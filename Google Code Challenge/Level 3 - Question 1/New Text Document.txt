@@ -1,0 +1,298 @@
+You're awfully close to destroying the LAMBCHOP doomsday device and freeing Commander Lambda's bunny prisoners, but once they're free of the prison blocks, the bunnies are going to need to escape Lambda's space station via the escape pods as quickly as possible. Unfortunately, the halls of the space station are a maze of corridors and dead ends that will be a deathtrap for the escaping bunnies. Fortunately, Commander Lambda has put you in charge of a remodeling project that will give you the opportunity to make things a little easier for the bunnies. Unfortunately (again), you can't just remove all obstacles between the bunnies and the escape pods - at most you can remove one wall per escape pod path, both to maintain structural integrity of the station and to avoid arousing Commander Lambda's suspicions. 
+
+You have maps of parts of the space station, each starting at a prison exit and ending at the door to an escape pod. The map is represented as a matrix of 0s and 1s, where 0s are passable space and 1s are impassable walls. The door out of the prison is at the top left (0,0) and the door into an escape pod is at the bottom right (w-1,h-1). 
+
+Write a function answer(map) that generates the length of the shortest path from the prison door to the escape pod, where you are allowed to remove one wall as part of your remodeling plans. The path length is the total number of nodes you pass through, counting both the entrance and exit nodes. The starting and ending positions are always passable (0). The map will always be solvable, though you may or may not need to remove a wall. The height and width of the map can be from 2 to 20. Moves can only be made in cardinal directions; no diagonal moves are allowed.
+
+Languages
+=========
+
+To provide a Python solution, edit solution.py
+To provide a Java solution, edit solution.java
+
+Test cases
+==========
+
+Inputs:
+    (int) maze = [[0, 1, 1, 0], [0, 0, 0, 1], [1, 1, 0, 0], [1, 1, 1, 0]]
+Output:
+    (int) 7
+
+Inputs:
+    (int) maze = [[0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
+Output:
+    (int) 11
+
+
+import java.util.ArrayList;
+
+/**
+ * Created by bsoni1 on 12/8/2016.
+ */
+
+public class Answer {
+    //    ArrayList<ArrayList<Integer>> maze = new ArrayList<ArrayList<Integer>>();
+//        maze.add([0, 0, 0, 0, 0, 0],[1, 1, 1, 1, 1, 0],[0, 0, 0, 0, 0, 0],[0, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0]);
+    public static void main(String[] args) {
+
+        // int [][] maze = {{0, 1, 1, 0}, {0, 0, 0, 1},{1, 5, 0, 0},{1, 1, 1, 0}};
+        int[][] maze = {{0, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1}, {0, 1, 1, 1, 1, 1}, {0, 0, 0, 0, 0, 0}};
+
+        //answer(maze);
+
+        Maze = maze;
+        int height = maze.length;
+        int width = maze[0].length;
+
+        for (int  h = 0 ; h < height; h ++){
+            for (int w = 0; w < width; w ++  ){
+                ArrayList <Integer> mIndex =  new ArrayList<Integer>();
+                try {
+                    int random = maze[h][w+1];
+                    mIndex.add((h)*height+w+1);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }try {
+                    int random = maze[h+1][w];
+                    mIndex.add((h+1)*height+w);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }try {
+                    int random = maze[h][w-1];
+                    mIndex.add((h)*height+w-1);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }
+                try {
+                    int random = maze[h-1][w];
+                    mIndex.add((h-1)*height+w);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }
+                moves.add(mIndex);
+
+            }
+        }
+
+        countSteps(0, 35);
+
+        System.out.println("**********final answer is  ---" + steps);
+    }
+    private static int [][] Maze;
+    private static int steps = 1;
+    private static int nOnes = 0;
+    private static ArrayList<ArrayList<Integer>> moves = new ArrayList<ArrayList<Integer>>();
+    private static ArrayList<Integer> temp = new ArrayList<Integer>();
+    private static ArrayList<Integer> allreadyChecked = new ArrayList<Integer>();
+
+    private static void countSteps(int src, int dest) {
+        nOnes = nOnes+Maze[src/(Maze.length)][src%(Maze[0].length)];
+        System.out.println("Ones are ---- " + nOnes + " at  ["+src/(Maze.length)+"],["+src%(Maze[0].length)+"]");
+        ArrayList<Integer> a = moves.get(src);
+        System.out.println("checking in   ---" + a);
+        if(a.contains(dest)){
+            System.out.println("found in "+ a);
+            return;// steps;
+        }else {
+            allreadyChecked.addAll(a);
+            System.out.println("allreadyChecked " + allreadyChecked);
+            int aSize = a.size();
+            for (int i = 0; i < aSize; i++) {
+                nOnes = nOnes+Maze[a.get(i)/(Maze.length)][a.get(i)%(Maze[0].length)];
+                System.out.println("Ones are ---- " + nOnes + " at  ["+a.get(i)/(Maze.length)+"],["+a.get(i)%(Maze[0].length)+"]");
+                getNextMoves(a.get(i), dest);//prepare next set of temp array for us
+            }
+            steps = steps + 1;
+            ifDestisThere(dest); //search in temp array
+            // return steps;
+        }
+
+    }
+    private static void getNextMoves(int startPt, int dest) {
+
+        ArrayList<Integer> nextMoves = moves.get(startPt);
+        System.out.println("next set of movers are    " + nextMoves + " startpoint is  " + startPt + "   src is    " + startPt);
+        //nextMoves.remove(new Integer(src)); //removing older to src
+
+        for (int nextM = 0; nextM < nextMoves.size(); nextM++) {
+            if (temp.contains(nextMoves.get(nextM))) {
+
+            } else {
+                temp.add(nextMoves.get(nextM));
+            }
+
+        }
+        System.out.println("temp is   ---" + temp);
+        temp.removeAll(allreadyChecked);
+        System.out.println("removed checked   " + temp);
+
+
+    }
+
+    //check in each of temp array elements
+    public static void ifDestisThere(int dest) {
+        if (temp.contains(dest)) {
+            System.out.println("found in " + temp);
+            return;// steps;
+        } else {
+            steps = steps + 1;
+            for (int t = 0; t < temp.size(); t++) {
+
+                ArrayList<Integer> a = moves.get(temp.get(t));
+                if (a.contains(dest)) {
+                    steps++;
+                    System.out.println("found in " + temp.get(t));
+                    return;// steps;
+                }
+            }
+            // prepare next temp
+            ArrayList<Integer> temp2 = new ArrayList<Integer>(temp);
+
+            System.out.println("*************Cleared old temp**********");
+            temp.clear();
+            System.out.println("****new temp*****" + temp2);
+
+            System.out.println("***allreadychecked*****" + allreadyChecked);
+            for (int tempitemp = 0; tempitemp < temp2.size(); tempitemp++) {
+
+                allreadyChecked.add(temp2.get(tempitemp));
+                getNextMoves(temp2.get(tempitemp), dest);
+            }
+
+            ifDestisThere(dest);
+        }
+        //return steps;
+    }
+}
+
+/*
+    private static int count = 0;
+    public static int answer(int[][] maze) {
+        int len = maze.length;
+        step [] searchTree = new step [len*len]; //search tree for objects of nodes
+        int k = 0;
+        for (int  row = 0 ; row < len; row ++){
+            for (int col = 0; col<len; col ++  ){
+                ArrayList <Integer> mIndex =  new ArrayList<Integer>();
+                try {
+                    int random = maze[row][col+1];
+                    mIndex.add((row)*len+col+1);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }try {
+                    int random = maze[row+1][col];
+                    mIndex.add((row+1)*len+col);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }try {
+                    int random = maze[row][col-1];
+                    mIndex.add((row)*len+col-1);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }
+                try {
+                    int random = maze[row-1][col];
+                    mIndex.add((row-1)*len+col);
+
+                } catch (ArrayIndexOutOfBoundsException e) {
+
+                }
+                searchTree[k] = new step(k, maze[row][col], mIndex);
+                k++;
+            }
+        }
+        for (int i = 0 ; i < searchTree.length; i++) {
+            System.out.println(searchTree[i].id  +  "  value is  - " +searchTree[i].value + " possible moves are " + searchTree[i].moves);
+        }
+        seePath(0,len*len-1,searchTree);
+        // Your code goes here.
+        return count;
+    }
+    private static class step{
+        int id;
+        int value ;
+        ArrayList <Integer> moves;
+        String color;
+        private step(int i, int v, ArrayList<Integer> m) {
+            id = i;
+            value = v;
+            moves = m;
+            color = "white";
+        }
+    }
+    private  static boolean found = false;
+    private  static int nOnes = 0;
+    private  static ArrayList<Integer> allreadyCheckedPath = new ArrayList<Integer>();
+    private static ArrayList<Integer> parents=  new ArrayList<Integer>();
+
+    public static void seePath(int start, int end, step [] searchTree) {
+        System.out.println("starting from  "+  start + " looking for " + end);
+        System.out.println(nOnes);
+        //int firstLocation = start;//Members.indexOf(first);
+        allreadyCheckedPath.add(start);
+        //parents is a list to hold the search point we are at
+        parents.add(start); //add the search node to the parents list
+        searchTree[start].color = "grey";
+        if (searchTree[start].value == 1){
+            nOnes++;
+//        }
+//        if (nOnes>1){
+//            parents.remove(start);
+//            allreadyCheckedPath.add(start);
+//            nOnes = nOnes-searchTree[start].value;
+//            return;
+        }else {
+            int thisNodeParent = start; //searchTree.get(firstLocation).parent;
+            ArrayList<Integer> thisNode = searchTree[start].moves;
+            thisNode.removeAll(allreadyCheckedPath);
+
+            System.out.println("child are  - " + thisNode);
+            if (thisNode.isEmpty()) {
+                searchTree[start].color = "Black";
+                parents.remove(start);
+
+            } else {
+                if (thisNode.contains(end)) {
+                    found = true;
+                    parents.add(end);
+                    printPath();
+                } else {
+                    allreadyCheckedPath.addAll(thisNode);
+                    int interator = thisNode.size();
+                    for (int i = 0; i < interator; i++) {
+                        if(nOnes<2){
+                        if (!found) {
+                            seePath(thisNode.get(i), end, searchTree); // keep calling it recursively till you find in the
+                            if (!found) {
+                                //if the destination was not found  in this step remove the parent node from the search path
+                                parents.remove(thisNode.get(i));
+                            }
+                        }
+                        }else{
+                            nOnes = nOnes-searchTree[start].value;
+                            parents.remove(thisNode.get(i));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void printPath(){
+        System.out.print(parents);
+        for(int i = 0; i <parents.size(); i++){
+            System.out.print(parents.get(i) +" -->");
+        }
+        parents.clear();
+    }
+
+
+}
+*/

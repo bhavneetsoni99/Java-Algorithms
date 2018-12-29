@@ -1,0 +1,316 @@
+/**
+ * Created by BHAVN on 5/9/2017.
+
+ */
+
+import sun.reflect.generics.tree.Tree;
+
+import java.lang.reflect.Array;
+import java.util.*;
+
+public class Answer2 {
+    public static void main(String[] args) {
+////
+//        int[] banana_list = new int[2];
+//        banana_list[0] = 4;
+//        banana_list[1] = 10;
+////////
+//        int[] banana_list = new int[18];//1, 2, 5, 6, 13, 16, 16, 38, 48, 58, 104
+//        banana_list[0] = 2;
+//        banana_list[1] = 6;
+//        banana_list[2] = 14;
+//        banana_list[3] = 2;
+//        banana_list[4] = 8;
+//        banana_list[5] = 12;
+//        banana_list[6] = 120;
+//        banana_list[7] = 95556;
+//        banana_list[8] = 75683;
+//        banana_list[9] = 243232;
+//        banana_list[10] = 73433;
+//        banana_list[11] = 343254;
+//        banana_list[12] = 63646;
+//        banana_list[13] = 565656;
+//        banana_list[14] = 84764674;
+//        banana_list[15] = 446446;
+//        banana_list[16] = 676776;
+//        banana_list[17] = 234463;
+        int[] banana_list = new int[14];//1, 2, 5, 6, 13, 16, 16, 38, 48, 58, 104
+        banana_list[0] = 1;
+        banana_list[1] = 2;
+        banana_list[2] = 3;
+        banana_list[3] = 4;
+        banana_list[4] = 5;
+        banana_list[5] = 7;
+        banana_list[6] = 8;
+        banana_list[7] = 13;
+        banana_list[8] = 16;
+        banana_list[9] = 38;
+        banana_list[10] = 48;
+        banana_list[11] = 58;
+        banana_list[12] = 104;
+        banana_list[13] = 104;
+
+        int guards = answer(banana_list);
+        System.out.println("****************************************");
+        System.out.println("Total Number of guards guarding are  " + guards);
+        System.out.println("****************************************");
+        System.out.println("****************************************");
+
+    }
+//[[3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [], [], [0, 4, 5, 6, 7, 8, 9, 10, 11, 12], [0, 3, 5, 6, 7, 8, 9, 10, 11, 12], [0, 3, 4, 6, 7, 8, 9, 10, 12], [0, 3, 4, 5, 7, 8, 9, 10, 11, 12], [0, 3, 4, 5, 6, 8, 9, 10, 11, 12], [0, 3, 4, 5, 6, 7, 9, 11, 12], [0, 3, 4, 5, 6, 7, 8, 10, 11, 12], [0, 3, 4, 5, 6, 7, 9, 11, 12], [0, 3, 4, 6, 7, 8, 9, 10, 12], [0, 3, 4, 5, 6, 7, 8, 9, 10, 11], []]
+    public static int answer(int[] banana_list) {
+        int numberOfGuards = banana_list.length;
+        //create maps for storing combinations that lead to infinite loops and stops
+        HashMap<Integer, HashSet<String>> infiniteLoopCombinationsHashMap = new HashMap<>();
+        ArrayList<ArrayList<Integer>> infiniteLoopCombsArrayList = new ArrayList<>(numberOfGuards);
+
+
+        int guardsNotInterested = 0;
+        if (numberOfGuards < 2) {
+            guardsNotInterested = numberOfGuards;
+        } else {
+            Arrays.sort(banana_list);
+
+            for (int i = 0; i < numberOfGuards; i++) {
+
+                try{
+                    infiniteLoopCombsArrayList.get(i);
+                }catch (Exception e){
+                    infiniteLoopCombsArrayList.add(new ArrayList<>());
+                }
+                try{
+                    if (banana_list[i] == banana_list[i - 1]) {
+                        infiniteLoopCombsArrayList.add(infiniteLoopCombsArrayList.get(i-1));
+                        if (infiniteLoopCombinationsHashMap.containsKey(i - 1)) {
+                            infiniteLoopCombinationsHashMap.put(i, infiniteLoopCombinationsHashMap.get(i - 1));
+                        }
+                        continue;
+                    }
+                }catch (Exception e){
+
+                }
+                HashSet<String> infiniteLoopCombinationsForJ= new HashSet<>();
+                ArrayList<Integer> infiniteLoopCombsALForJ = new ArrayList<>();
+                //try for each combination
+                for (int j = i + 1; j < numberOfGuards; j++) {
+                    try{
+                        infiniteLoopCombsArrayList.get(j);
+                    }catch (Exception e){
+                        infiniteLoopCombsArrayList.add(j,new ArrayList<>());
+                    }
+
+                    //set unique id different guards can have some number of bananas
+                    String keyJ = banana_list[j] + " at " + j;
+                    String valueJ = banana_list[i] + " at " + i;
+                        boolean isLooping = checkCombinations(banana_list[i], banana_list[j]);
+                        //send the numbers to find if they will loop or not
+                        //handle based on weather it will be looping or not
+                        if (isLooping) {
+                            System.out.println(banana_list[i] + " and " + banana_list[j] + " are looping ");
+                            //handle what to do with loopinginfinete combs
+                            //add  element (j) to loopingcombs array
+
+                            infiniteLoopCombsArrayList.get(i).add(j);
+                            infiniteLoopCombsArrayList.get(j).add(i);
+                            //}catch (Exception e){
+
+                            //}
+                        }
+
+
+                }
+
+
+
+                //after the inner loop is over push the stopping  and looping combinations into hashmaps
+                // check if the element(i) is present in the hashmapArrays
+                String keyI = banana_list[i] + " at " + i;
+                String valueI = banana_list[i] + " at " + i;
+                if (infiniteLoopCombinationsHashMap.containsKey(i)) {
+                    //get the already present arraylist add the new numbers into it
+                    HashSet<String> tempI = infiniteLoopCombinationsHashMap.get(i);
+                    tempI.addAll(infiniteLoopCombinationsForJ);
+                    infiniteLoopCombinationsHashMap.put(i, tempI);
+                } else {
+                    //put the combination
+                    infiniteLoopCombinationsHashMap.put(i, infiniteLoopCombinationsForJ);
+                }
+            }
+            System.out.println("infiniteLoopCombsArrayList " + infiniteLoopCombsArrayList);
+            //now start finding the combs
+
+            }
+        boolean combinationsLeft = true;
+        while(combinationsLeft) {
+            int[] elementsToRemove = combsTobeRemoved(infiniteLoopCombsArrayList);
+            infiniteLoopCombsArrayList = removeElements(infiniteLoopCombsArrayList,elementsToRemove);
+
+        }
+           // Element[] combinationsObjectArray = new Element[numberOfGuards];
+
+
+            /*
+            This is where we do a depth first search from the smallest one onwards
+
+                sortedIndexCombs.addAll(infiniteLoopCombsArrayList.get(k));
+                System.out.println("sortedIndexCombsn " + sortedIndexCombs);
+                sortedCombs.put(k, sortedIndexCombs);
+                String findThis = banana_list[k] + " at " + k;
+//                HashMap<Integer, HashSet<String>> temp = infiniteLoopCombinationsHashMap;
+//                if (temp.containsKey(k)) {
+//                    HashSet<String> holder = temp.get(k);
+//                    System.out.println("temp before operation " + temp);
+//                    System.out.println("holder " + holder);
+//
+//                    if (holder.isEmpty()) {
+//                        guardsNotInterested++;
+//                    } else {
+//                        String element = holder.iterator().next();
+//                        System.out.println("Element to  Remove " + element);
+//                        String[] vals = element.split(" at ");
+//                        int removeThisTooIndex = Integer.parseInt(vals[1]);
+//                        temp.remove(k);
+//                        temp.remove(removeThisTooIndex);
+//                        System.out.println("Remove Row index " + k + " and " + removeThisTooIndex);
+//                        //remove from individual combinations
+//                        for (int l = k + 1; l < numberOfGuards; l++) {
+//                            if (temp.containsKey(l)) {
+//                                HashSet<String> holderForRemovingInd = temp.get(l);
+//                                if (holderForRemovingInd.isEmpty()) {
+//                                    guardsNotInterested++;
+//                                } else {
+//                                    holderForRemovingInd.remove(element);
+//                                    holderForRemovingInd.remove(findThis);
+//                                    temp.put(l, holderForRemovingInd);
+//                                }
+//                            }
+//                        }
+//                        System.out.println("temp after removing element " + temp);
+//                    }
+//                }
+//            }
+            }
+        System.out.println("*****************All ARRAYS***************************");
+        System.out.println(infiniteLoopCombsArrayList);
+        System.out.println("*****************Sorted ARRAYS***************************");
+            System.out.println(sortedCombs);
+            System.out.println("********************************************");
+        return guardsNotInterested;
+    }
+//    private static int smallest(){
+//        TreeMap<Integer, PriorityQueue<Integer>> remainingCombinations = new TreeMap<>();
+*/
+     return remainingCombinations;
+    }
+    class Element {
+        int index;
+        ArrayList<Integer> combinationsList;
+        int getSize() {
+            return this.combinationsList.size();
+        }
+        void removeElementFromCombinationList(int removeThis) {
+            this.combinationsList.remove(Integer.valueOf(removeThis));
+        }
+        int elementWithLeastCombs(ArrayList<ArrayList<Integer>> temp){
+            int leastCombs=1000;
+            for(int element:combinationsList){
+                if(temp.get(element).size() < leastCombs){
+                    leastCombs = temp.get(element).size();
+                }
+            }
+            return leastCombs;
+        }
+        void addElement(int index){
+            combinationsList.add(index);
+        }
+        void removeElement(int index){
+            combinationsList.remove(Integer.valueOf(index));
+        }
+
+        Element(int index,ArrayList<Integer>combinationsList){
+         this.index = index;
+         this.combinationsList = combinationsList;
+        }
+    }
+    private static int [] combsTobeRemoved(ArrayList<ArrayList<Integer>> loopCombinations){
+        int [] removeThese = new int[2];
+        int smallestCombs = 1000;
+        int loopCombinationsSize = loopCombinations.size();
+        for (int i = 0; i< loopCombinationsSize; i++) {
+            if (loopCombinations.get(i).size()<smallestCombs){
+                smallestCombs=i;
+            }
+        }
+
+        ArrayList<Integer> combsFor = loopCombinations.get(smallestCombs);
+        int smallestOfSmallestCombs = 1000;
+        int smallerloopCombinationsSize = combsFor.size();
+        for (int i = 0; i< smallerloopCombinationsSize; i++) {
+            if (loopCombinations.get(combsFor.get(i)).size()<smallestCombs){
+                smallestOfSmallestCombs=i;
+            }
+        }
+        removeThese[0] = smallestCombs;
+        removeThese[1] = smallestOfSmallestCombs;
+        return removeThese;
+    }
+    private static ArrayList<ArrayList<Integer>> removeElements(ArrayList<ArrayList<Integer>>loopCombinations, int []
+            removeThese){
+        int bigger, smaller;
+        if(removeThese[0]>removeThese[1]){
+            bigger = removeThese[0];
+            smaller = removeThese[1];
+        }else{
+            bigger = removeThese[1];
+            smaller = removeThese[0];
+        }
+        loopCombinations.remove(bigger);
+        loopCombinations.remove(smaller);
+
+        for(int i=0; i<loopCombinations.size(); i++){
+            loopCombinations.get(i).remove(Integer.valueOf(smaller));
+            loopCombinations.get(i).remove(Integer.valueOf(bigger));
+        }
+        return loopCombinations;
+
+    }
+    private static boolean checkCombinations(int smaller, int bigger) {
+        if(smaller == bigger) {
+            return false;
+        }
+        int total = smaller + bigger; //total will always remain constant
+        if (total%2 == 1){//if total is odd they smaller and bigger can never be equal
+            return true;
+        }
+        boolean isLooping = false;
+        boolean isStopping = false;
+
+        HashSet<String> tempCombinations = new HashSet<>();
+        while(!isStopping && !isLooping) {
+            tempCombinations.add(smaller + "+" + bigger);
+            int biggerTemp = bigger - smaller;
+            smaller = smaller * 2;
+
+            if (biggerTemp > smaller) {
+                bigger = biggerTemp;
+            } else {
+                bigger = smaller;
+                smaller = biggerTemp;
+            }
+           // System.out.println("key is " + smaller + "+" + bigger);
+            isLooping = tempCombinations.contains(smaller + "+" + bigger);
+            isStopping = smaller == bigger;
+        }
+//        int remainder;
+//        int div = total;
+//        while(!isLooping && !isStopping) {
+//            remainder = div%2;
+//            div = div/2;
+//
+//            isStopping = div ==1|| div==smaller;// && remainder==0;
+//            isLooping = remainder==1;
+//            System.out.println("key is " + div + "+" + remainder);
+//        }
+        return isLooping;
+    }
+}

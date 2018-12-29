@@ -1,0 +1,140 @@
+package com.google.challenges; 
+import java.util.HashMap;
+import java.util.HashSet;
+public class Answer {   
+    public static int answer(int[] banana_list) {
+               /*
+        to find the solution we need to take the following steps
+            1. find the guards each of the guard will go in infinite loop
+            2. first match the ones which are pairing with least number of guards
+            3. keep removing them
+        */
+        int numberOfGuards = banana_list.length;
+        int guardsNotInterested = 0;
+        if (numberOfGuards < 2) {
+            guardsNotInterested = numberOfGuards;
+        } else {
+            for (int i = 0; i < numberOfGuards; i++) {
+                HashSet<Integer> infiniteLoopCombinationsLocal = new HashSet<>();
+                //make combinations with the remainig remaining guards (since A->B is same as B->A)
+                for (int j = i + 1; j < numberOfGuards; j++) {
+                    //check the numbers to find if they will loop or not
+                    boolean isLooping = checkCombinations(banana_list[i], banana_list[j]);
+
+                    //handle if they will be looping
+                    if (isLooping) {
+
+                        //add  element (j) to loopingcombs
+                        infiniteLoopCombinationsLocal.add(j);
+                        //since i and j are looping j and i are also looping
+                        // add the element(i) to the element(j)'s combinations appropriately
+
+                        if (infiniteLoopCombinationsHashMap.containsKey(j)) {
+                            //add combination to the map entry if its already there
+                            infiniteLoopCombinationsHashMap.get(j).add(i);
+                        } else {
+                            //prepare new set and put it to the hashmap
+                            HashSet<Integer> addElementI = new HashSet<>();
+                            addElementI.add(i);
+                            infiniteLoopCombinationsHashMap.put(j, addElementI);
+                        }
+                    }
+                }
+                //after the inner loop is over push the looping combinations into hashmap
+                // check if the element(i) is present in the hashmapArrays
+                if (infiniteLoopCombinationsHashMap.containsKey(i)) {
+                    //get the already present arraylist add the new numbers into it
+                    HashSet<Integer> tempI = infiniteLoopCombinationsHashMap.get(i);
+                    tempI.addAll(infiniteLoopCombinationsLocal);
+                    infiniteLoopCombinationsHashMap.put(i, tempI);
+                } else {
+                    //put the combination
+                    infiniteLoopCombinationsHashMap.put(i, infiniteLoopCombinationsLocal);
+                }
+            }
+            //now start finding the combs continue until all of them have been accounted for
+            while(!infiniteLoopCombinationsHashMap.isEmpty()) {
+                // find the set with least number of combinations
+                int removeThis = combsTobeRemoved();
+                //handle if smallest one is empty means its not looping with anyone
+                if (infiniteLoopCombinationsHashMap.get(removeThis).isEmpty()) {
+                    infiniteLoopCombinationsHashMap.remove(removeThis);
+                    guardsNotInterested++;
+                } else {
+                    //if the smallest combination set is not empty find the element with
+                    //smallest set and combine with it
+                    int removeThisIndextoo = pairWith(removeThis);
+                    //since numbers have been selected they cant be used to make more combinations
+                    // remove them from all the elements combinations sets
+                    removeTheseEntries(removeThis, removeThisIndextoo);
+                }
+            }
+        }
+        return guardsNotInterested;
+    }
+    private static HashMap<Integer, HashSet<Integer>> infiniteLoopCombinationsHashMap = new HashMap<>();
+    private static Integer combsTobeRemoved(){
+        int smallestComb = 1000;//arbitrary number bigger than 100 (max possible combinations)
+        Integer smallestKey =1000;
+        for (Integer key : infiniteLoopCombinationsHashMap.keySet()) {
+            if(infiniteLoopCombinationsHashMap.get(key).size()<smallestComb){
+                smallestComb = infiniteLoopCombinationsHashMap.get(key).size();
+                smallestKey = key;
+            }
+            if(smallestComb ==0){
+                break;
+            }
+        }
+        return smallestKey;
+    }
+    private static int pairWith(int startingKey){
+        int smallestComb=1000; //arbitrary number bigger than 100 (max possible combinations)
+        int pairWith=1000;
+
+        HashSet<Integer> holder =infiniteLoopCombinationsHashMap.get(startingKey);
+        infiniteLoopCombinationsHashMap.remove(startingKey);
+        for (Integer k : holder) {
+
+            if (infiniteLoopCombinationsHashMap.get(k).size() < smallestComb) {
+                smallestComb = infiniteLoopCombinationsHashMap.get(k).size();
+                pairWith = k;
+                if (smallestComb == 0) {
+                    break;
+                }
+            }
+        }
+        infiniteLoopCombinationsHashMap.remove(pairWith);
+        return pairWith;
+    }
+    private static void removeTheseEntries(int a, int b){
+        //loop thru the map and remove the numbers used for combination
+        for(Integer key: infiniteLoopCombinationsHashMap.keySet()){
+            infiniteLoopCombinationsHashMap.get(key).remove(a);
+            infiniteLoopCombinationsHashMap.get(key).remove(b);
+        }
+    }
+    private static boolean checkCombinations(int valI, int valJ) {
+        if(valI == valJ) {//if both are equal wont loop
+            return false;
+        }
+        int total = valI + valJ;
+        if (total%2 == 1){//if total is odd they bigger can never be equal
+            return true;
+        }
+        boolean isLooping = false;
+        boolean isStopping = false;
+        int smaller = Math.min(valI,valJ);
+        int remainder;
+        int div = total;
+        //if the numbers are not looping they have to be equal at some point
+        //and the smaller number will have to double up to get there, hence
+        //it should be a multiple of 2 i.e. %2 = unless its the starting number or 1
+        while(!isLooping && !isStopping) {
+            remainder = div%2;
+            div = div/2;
+            isStopping = div==smaller || div==1;
+            isLooping = remainder==1;
+        }
+        return isLooping;
+    }
+}
